@@ -53,4 +53,10 @@ public class AntiVPN extends JavaPlugin {
 
     public String getCountryMessage() { return countryMessage; }
     public void setCountryMessage(String countryMessage) { this.countryMessage = countryMessage; }
+
+    private boolean countryCheckEnabled = true;
+    public boolean isCountryCheckEnabled() { return countryCheckEnabled; }
+
+    public void setCountryCheckEnabled(boolean countryCheckEnabled) { this.countryCheckEnabled = countryCheckEnabled; }
+
 }

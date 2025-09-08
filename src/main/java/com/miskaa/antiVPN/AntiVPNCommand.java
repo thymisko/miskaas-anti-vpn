@@ -58,6 +58,12 @@ public class AntiVPNCommand implements CommandExecutor {
                 } else sender.sendMessage(ChatColor.YELLOW + code + " is not in whitelist");
             }
 
+            case "togglecountryfilter" -> {
+                boolean current = plugin.isCountryCheckEnabled();
+                plugin.setCountryCheckEnabled(!current);
+                sender.sendMessage(ChatColor.GREEN + "Country whitelist check is now " + (!current ? "enabled" : "disabled"));
+            }
+
             case "countrymessage" -> {
                 if (args.length < 2) {
                     sender.sendMessage(ChatColor.RED + "Usage: /antivpn countrymessage <message>");
@@ -90,6 +96,7 @@ public class AntiVPNCommand implements CommandExecutor {
         sender.sendMessage(ChatColor.YELLOW + "/antivpn toggle " + ChatColor.WHITE + "- Enable or disable the plugin");
         sender.sendMessage(ChatColor.YELLOW + "/antivpn whitelistcountry <code> " + ChatColor.WHITE + "- Add a country to whitelist");
         sender.sendMessage(ChatColor.YELLOW + "/antivpn blacklistcountry <code> " + ChatColor.WHITE + "- Remove a country from whitelist");
+        sender.sendMessage(ChatColor.YELLOW + "/antivpn togglecountryfilter " + ChatColor.WHITE + "- Enable or disable country whitelist check globally");
         sender.sendMessage(ChatColor.YELLOW + "/antivpn countrymessage <message> " + ChatColor.WHITE + "- Set message for country restriction");
         sender.sendMessage(ChatColor.YELLOW + "/antivpn vpnmessage <message> " + ChatColor.WHITE + "- Set message for VPN/proxy kick");
     }
