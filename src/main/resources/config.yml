@@ -1,0 +1,5 @@
+vpn_message: "&cYou're using a VPN or a Proxy which is not allowed! If you think this is a mistake, please contact misko.bin on Discord"
+country_message: "&cYour country is not allowed on this server! If you think this is a mistake, please contact misko.bin"
+whitelisted_countries:
+  - PL
+  - CH

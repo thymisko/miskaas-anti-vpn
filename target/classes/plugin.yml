@@ -1,0 +1,10 @@
+name: miskaas_antiVPN
+version: '0.0.1-PRE-ALPHA'
+main: com.miskaa.antiVPN.AntiVPN
+author: miskaa
+api-version: '1.21'
+description: 'blocks VPN/Proxy connections and restricts certain countries'
+commands:
+  antivpn:
+    description: Manage AntiVPN settings
+    usage: /<command> <args>
