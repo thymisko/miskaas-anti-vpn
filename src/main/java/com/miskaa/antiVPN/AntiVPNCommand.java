@@ -4,11 +4,13 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-public class AntiVPNCommand implements CommandExecutor {
-
+public class AntiVPNCommand implements CommandExecutor, TabCompleter {
     private final AntiVPN plugin;
 
     public AntiVPNCommand(AntiVPN plugin) {
@@ -17,87 +19,96 @@ public class AntiVPNCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-
-        if (args.length == 0 || args[0].equalsIgnoreCase("help")) {
-            sendHelp(sender);
+        if (args.length == 0) {
+            sender.sendMessage(ChatColor.RED + "Use /antivpn help for commands.");
             return true;
         }
 
-        String sub = args[0].toLowerCase();
+        switch (args[0].toLowerCase()) {
+            case "help":
+                sender.sendMessage(ChatColor.YELLOW + "AntiVPN Commands:");
+                sender.sendMessage(ChatColor.GOLD + "/antivpn toggle" + ChatColor.WHITE + " - Enable/disable plugin");
+                sender.sendMessage(ChatColor.GOLD + "/antivpn togglecountryfilter" + ChatColor.WHITE + " - Toggle country filter");
+                sender.sendMessage(ChatColor.GOLD + "/antivpn whitelistcountry <code>" + ChatColor.WHITE + " - Whitelist country");
+                sender.sendMessage(ChatColor.GOLD + "/antivpn blacklistcountry <code>" + ChatColor.WHITE + " - Remove country from whitelist");
+                sender.sendMessage(ChatColor.GOLD + "/antivpn vpnmessage <msg>" + ChatColor.WHITE + " - Set VPN kick message");
+                sender.sendMessage(ChatColor.GOLD + "/antivpn countrymessage <msg>" + ChatColor.WHITE + " - Set country kick message");
+                sender.sendMessage(ChatColor.GOLD + "/antivpn ipbanmessage <msg>" + ChatColor.WHITE + " - Set IP-ban message");
+                return true;
 
-        switch (sub) {
-            case "toggle" -> {
-                boolean enabled = plugin.isEnabledFlag();
-                plugin.setEnabledFlag(!enabled);
-                sender.sendMessage(ChatColor.GREEN + "AntiVPN is now " + (!enabled ? "enabled" : "disabled"));
-            }
+            case "toggle":
+                plugin.setPluginEnabled(!plugin.isPluginEnabled());
+                sender.sendMessage(ChatColor.GREEN + "AntiVPN is now " + (plugin.isPluginEnabled() ? "enabled" : "disabled"));
+                return true;
 
-            case "whitelistcountry" -> {
+            case "togglecountryfilter":
+                plugin.setCountryCheckEnabled(!plugin.isCountryCheckEnabled());
+                sender.sendMessage(ChatColor.GREEN + "Country filter is now " + (plugin.isCountryCheckEnabled() ? "enabled" : "disabled"));
+                return true;
+
+            case "whitelistcountry":
                 if (args.length < 2) {
-                    sender.sendMessage(ChatColor.RED + "Usage: /antivpn whitelistcountry <country code>");
+                    sender.sendMessage(ChatColor.RED + "Usage: /antivpn whitelistcountry <code>");
                     return true;
                 }
-                String code = args[1].toUpperCase();
-                List<String> list = plugin.getWhitelistedCountries();
-                if (!list.contains(code)) {
-                    list.add(code);
-                    sender.sendMessage(ChatColor.GREEN + "Added " + code + " to whitelist");
-                } else sender.sendMessage(ChatColor.YELLOW + code + " is already whitelisted");
-            }
+                List<String> whitelist = plugin.getConfig().getStringList("whitelistedCountries");
+                whitelist.add(args[1].toUpperCase());
+                plugin.getConfig().set("whitelistedCountries", whitelist);
+                plugin.saveAndReload();
+                sender.sendMessage(ChatColor.GREEN + "Whitelisted country: " + args[1].toUpperCase());
+                return true;
 
-            case "blacklistcountry" -> {
+            case "blacklistcountry":
                 if (args.length < 2) {
-                    sender.sendMessage(ChatColor.RED + "Usage: /antivpn blacklistcountry <country code>");
+                    sender.sendMessage(ChatColor.RED + "Usage: /antivpn blacklistcountry <code>");
                     return true;
                 }
-                String code = args[1].toUpperCase();
-                List<String> list = plugin.getWhitelistedCountries();
-                if (list.contains(code)) {
-                    list.remove(code);
-                    sender.sendMessage(ChatColor.GREEN + "Removed " + code + " from whitelist");
-                } else sender.sendMessage(ChatColor.YELLOW + code + " is not in whitelist");
-            }
+                List<String> whitelist2 = plugin.getConfig().getStringList("whitelistedCountries");
+                whitelist2.remove(args[1].toUpperCase());
+                plugin.getConfig().set("whitelistedCountries", whitelist2);
+                plugin.saveAndReload();
+                sender.sendMessage(ChatColor.GREEN + "Removed country from whitelist: " + args[1].toUpperCase());
+                return true;
 
-            case "togglecountryfilter" -> {
-                boolean current = plugin.isCountryCheckEnabled();
-                plugin.setCountryCheckEnabled(!current);
-                sender.sendMessage(ChatColor.GREEN + "Country whitelist check is now " + (!current ? "enabled" : "disabled"));
-            }
-
-            case "countrymessage" -> {
-                if (args.length < 2) {
-                    sender.sendMessage(ChatColor.RED + "Usage: /antivpn countrymessage <message>");
-                    return true;
-                }
-                String msg = String.join(" ", args).substring(sub.length() + 1);
-                plugin.setCountryMessage(msg);
-                sender.sendMessage(ChatColor.GREEN + "Country kick message updated");
-            }
-
-            case "vpnmessage" -> {
+            case "vpnmessage":
                 if (args.length < 2) {
                     sender.sendMessage(ChatColor.RED + "Usage: /antivpn vpnmessage <message>");
                     return true;
                 }
-                String msg = String.join(" ", args).substring(sub.length() + 1);
-                plugin.setVpnMessage(msg);
-                sender.sendMessage(ChatColor.GREEN + "VPN kick message updated");
-            }
+                plugin.setVpnMessage(String.join(" ", Arrays.copyOfRange(args, 1, args.length)));
+                sender.sendMessage(ChatColor.GREEN + "VPN message updated!");
+                return true;
 
-            default -> sender.sendMessage(ChatColor.RED + "Unknown subcommand: " + sub + ". Type /antivpn help for commands.");
+            case "countrymessage":
+                if (args.length < 2) {
+                    sender.sendMessage(ChatColor.RED + "Usage: /antivpn countrymessage <message>");
+                    return true;
+                }
+                plugin.setCountryMessage(String.join(" ", Arrays.copyOfRange(args, 1, args.length)));
+                sender.sendMessage(ChatColor.GREEN + "Country message updated!");
+                return true;
+
+            case "ipbanmessage":
+                if (args.length < 2) {
+                    sender.sendMessage(ChatColor.RED + "Usage: /antivpn ipbanmessage <message>");
+                    return true;
+                }
+                plugin.setIpBanMessage(String.join(" ", Arrays.copyOfRange(args, 1, args.length)));
+                sender.sendMessage(ChatColor.GREEN + "IP-ban message updated!");
+                return true;
+
+            default:
+                sender.sendMessage(ChatColor.RED + "Unknown subcommand. Use /antivpn help.");
+                return true;
         }
-
-        return true;
     }
 
-    private void sendHelp(CommandSender sender) {
-        sender.sendMessage(ChatColor.GOLD + "--- AntiVPN Help ---");
-        sender.sendMessage(ChatColor.YELLOW + "/antivpn help " + ChatColor.WHITE + "- Show this help message");
-        sender.sendMessage(ChatColor.YELLOW + "/antivpn toggle " + ChatColor.WHITE + "- Enable or disable the plugin");
-        sender.sendMessage(ChatColor.YELLOW + "/antivpn whitelistcountry <code> " + ChatColor.WHITE + "- Add a country to whitelist");
-        sender.sendMessage(ChatColor.YELLOW + "/antivpn blacklistcountry <code> " + ChatColor.WHITE + "- Remove a country from whitelist");
-        sender.sendMessage(ChatColor.YELLOW + "/antivpn togglecountryfilter " + ChatColor.WHITE + "- Enable or disable country whitelist check globally");
-        sender.sendMessage(ChatColor.YELLOW + "/antivpn countrymessage <message> " + ChatColor.WHITE + "- Set message for country restriction");
-        sender.sendMessage(ChatColor.YELLOW + "/antivpn vpnmessage <message> " + ChatColor.WHITE + "- Set message for VPN/proxy kick");
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        if (args.length == 1) {
+            return Arrays.asList("help", "toggle", "togglecountryfilter", "whitelistcountry",
+                    "blacklistcountry", "vpnmessage", "countrymessage", "ipbanmessage");
+        }
+        return new ArrayList<>();
     }
 }

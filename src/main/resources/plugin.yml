@@ -1,5 +1,5 @@
 name: miskaas_antiVPN
-version: '0.0.1-PRE-ALPHA'
+version: '0.0.3-PRE-ALPHA'
 main: com.miskaa.antiVPN.AntiVPN
 author: miskaa
 api-version: '1.21'
