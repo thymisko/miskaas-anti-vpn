@@ -1,0 +1,8 @@
+{
+  "id": "antivpn",
+  "name": "miskaasAntiVPN",
+  "version": "0.0.4-BETA",
+  "description": "miskaa's antivpn velocity version",
+  "authors": ["miskaa"],
+  "main": "com.miskaa.antivpn.AntiVPNVelocity"
+}

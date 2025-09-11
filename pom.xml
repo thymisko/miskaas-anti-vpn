@@ -6,7 +6,7 @@
 
     <groupId>com.miskaa</groupId>
     <artifactId>antivpn</artifactId>
-    <version>0.0.1-PRE-ALPHA</version>
+    <version>0.0.4-BETA</version>
     <packaging>jar</packaging>
 
     <name>antivpn</name>

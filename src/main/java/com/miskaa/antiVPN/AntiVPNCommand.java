@@ -5,6 +5,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,8 +18,20 @@ public class AntiVPNCommand implements CommandExecutor, TabCompleter {
         this.plugin = plugin;
     }
 
+    private boolean hasPermission(CommandSender sender) {
+        if (!(sender instanceof Player)) {
+            return true;
+        }
+        return sender.hasPermission("antivpn.admin") || sender.isOp();
+    }
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (!hasPermission(sender)) {
+            sender.sendMessage(ChatColor.RED + "You don't have permission to use this command.");
+            return true;
+        }
+
         if (args.length == 0) {
             sender.sendMessage(ChatColor.RED + "Use /antivpn help for commands.");
             return true;
@@ -105,6 +118,9 @@ public class AntiVPNCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        if (!hasPermission(sender)) {
+            return new ArrayList<>();
+        }
         if (args.length == 1) {
             return Arrays.asList("help", "toggle", "togglecountryfilter", "whitelistcountry",
                     "blacklistcountry", "vpnmessage", "countrymessage", "ipbanmessage");
